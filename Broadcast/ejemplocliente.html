@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Ejemplo de cliente Node.js</title>
+
+	<script type="text/javascript" src="jquery.js"></script>
+	<script src="socket.io.js"></script>
+	<script>
+		var servidorNode = 'http://127.0.0.1';
+		var puerto = 8008;
+		var id_user;
+		
+		try {
+			socket = io.connect(servidorNode+':'+puerto+'/'); // realizo la conexion
+			
+			socket.on('alguienBroadcasteo', function (data) {
+				document.getElementById('TextArea').value = data.texto;
+			});
+		}
+		catch (err) {
+			alert('No está disponible el servidor Node.js');
+		}
+			
+		function salaPrincipal() {
+			var id = "0";
+			id_user = id;
+			socket.emit('ejemplo3', {room: id});
+		}
+		
+		function ejemplo3() {
+			var id=id_user;
+			socket.emit('salirRoom', {room: id});
+			var e = document.getElementById("dropdown");
+			id = e.options[e.selectedIndex].text;
+			id_user = id;
+			socket.emit('ejemplo3', {room: id});
+		}
+		
+		function salirRoom() {
+			var e = document.getElementById("dropdown");
+			var id = e.options[e.selectedIndex].text;
+			socket.emit('salirRoom', {room: id});
+			id = "0";
+			socket.emit('ejemplo3', {room: id});
+			var valor = "There";
+			$("#dropdown option[value="+ valor +"]").attr("selected",true);
+		}	
+		
+		function broadcast() {
+			var texto = document.getElementById('TextArea').value;
+			socket.emit('broadcastDeCliente', {mensaje: texto});
+		}
+				
+		function cerrarCon() {
+			socket.disconnect();
+		}
+		
+	</script>
+</head>
+<body onload="salaPrincipal()">
+	<div id="main">
+	<h2> EJEMPLO BROADCAST</h2>	
+		<div>
+			 <label for="dropdown">Seleccione Una Sala</label>
+			 <select id="dropdown" onChange="ejemplo3()"></select> 
+			 <input id="btn_salirRoom" type="button" onClick="salirRoom()" value="Salir Room" ></input>
+			 <br><br> 
+		</div>
+		<div>
+			 <label for="TextArea"> Cada vez que se escribe en el Text Area se ejecuta un broadcast </label>
+		</div>
+		<textarea id="TextArea"  rows="10" cols="70" onKeyPress="broadcast()" onkeydown="broadcast()" onKeyUp="broadcast()" ></textarea>
+		<br><br>
+		<!--   on key, esas 3 funciones hacen que a penas escriba se manda por broadcast    -->
+		<input id="btn_close" type="button" onclick="cerrarCon()" value="Desconectar" ></input>
+		<br>
+	</div>
+<script>
+var ddl = document.getElementById("dropdown");
+ddl.options.add(new Option("0","There"));
+ddl.options.add(new Option("1","There1"));
+ddl.options.add(new Option("2","There2"));
+</script>
+</body>
