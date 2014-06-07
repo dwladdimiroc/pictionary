@@ -28,12 +28,9 @@ io.sockets.on('connection', function (socket) {
 		socket.join(roomname);
 		socket.room = roomname;
 		socket.emit('updaterooms', rooms, roomname);
-		//socket.broadcast.to(roomname).emit('updatechat', 'Servidor', socket.username+' ha ingresado a la sala');
+		socket.emit('updateusers', usernames);
 		socket.emit('updatechat', 'Servidor', 'Sala '+ roomname + ' creada correctamente');
-    		//rooms[rooms] = rooms;
-    		//socket.room = roomname;
-            //socket.join(roomname);
-    	//subscribe.subscribe(socket.room);
+
 });
 
 	// when the client emits 'adduser', this listens and executes
@@ -51,6 +48,8 @@ io.sockets.on('connection', function (socket) {
 		// echo to room 1 that a person has connected to their room
 		socket.broadcast.to('Principal').emit('updatechat', 'Servidor', username + ' se ha conectado');
 		socket.emit('updaterooms', rooms, 'Principal');
+		socket.emit('updateusers', usernames);
+
 	});
 	
 	// when the client emits 'sendchat', this listens and executes
@@ -69,6 +68,8 @@ io.sockets.on('connection', function (socket) {
 		socket.room = newroom;
 		socket.broadcast.to(newroom).emit('updatechat', 'Servidor', socket.username+' ha ingresado a la sala');
 		socket.emit('updaterooms', rooms, newroom);
+		socket.emit('updateusers', usernames);
+
 	});
 
 

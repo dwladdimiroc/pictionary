@@ -33,6 +33,17 @@
 		});
 	});
 
+
+	socket.on('updateusers', function(usernames) {
+		$('#usernames').empty();
+		$.each(usernames, function(key, value) {
+				$('#usernames').append('<div>' + value + '</div>');
+		});
+	});
+
+
+
+
 	function switchRoom(room){
 		socket.emit('switchRoom', room);
 	}
@@ -85,6 +96,8 @@ $(function(){
 <div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
 	<b>Salas</b>
 	<div id="rooms"></div>
+	<b>Usuarios</b>
+	<div id="usernames"></div>
 </div>
 <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
 	<div id="conversation"></div>
