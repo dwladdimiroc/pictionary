@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Acá poner el título, las importaciones de los css y javascript -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Ejemplo de cliente Node.js</title>
+	
+	
+	<script type="text/javascript" src="jquery.js"></script>
+	<script src="socket.io.js"></script>
+	<script>
+		var servidorNode = 'http://127.0.0.1'; //variable a cambiar, se cambia por otras ips porque se conectan por otro pc
+		var puerto = 8008; //la misma del cliente, sino, no se conecta nunca
+		var socket; 
+		try { 
+			socket = io.connect(servidorNode+':'+puerto+'/'); //inicia conexion
+			
+			socket.on('respuesta1', function (data) {
+				alert(data.respuesta);
+			});
+		}
+		catch (err) {
+			alert('No está disponible el servidor Node.js');
+		}
+		
+		function ejemplo1() {
+		var texto = document.getElementById('textfield').value; //obtiene variable que se ingresa por un textfield 
+			socket.emit('ejemplo1', {text: texto});//yo le envio un mensaje al servidor, que pasa por funcion ejemplo1(del servidor) y le pasa la variable text, que tiene texto. Se pueden agregar mas variables ejemplo: {text1:texto,text2:texto2}
+		}
+	</script>
+</head>
+<body>
+	<div id="main">
+	<h2> EJEMPLO UNICAST</h2>
+		<div>
+			<input id="textfield" type="text" ></input>
+			<input id="btn1" type="button" onclick="ejemplo1()" value="Enviar" ></input> <!-- -->
+		</div>
+	</div>
+</body>
+</html>
