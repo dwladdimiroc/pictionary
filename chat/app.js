@@ -30,9 +30,9 @@ io.sockets.on('connection', function (socket) {
 		// send client to room 1
 		socket.join('room1');
 		// echo to client they've connected
-		socket.emit('updatechat', 'Servidor', 'you have connected to room1');
+		socket.emit('updatechat', 'Servidor', 'Bienvenido a la sala Principal');
 		// echo to room 1 that a person has connected to their room
-		socket.broadcast.to('room1').emit('updatechat', 'SERVER', username + ' has connected to this room');
+		socket.broadcast.to('room1').emit('updatechat', 'Servidor', username + ' se ha conectado');
 		socket.emit('updaterooms', rooms, 'room1');
 	});
 	
@@ -45,12 +45,12 @@ io.sockets.on('connection', function (socket) {
 	socket.on('switchRoom', function(newroom){
 		socket.leave(socket.room);
 		socket.join(newroom);
-		socket.emit('updatechat', 'SERVER', 'you have connected to '+ newroom);
+		socket.emit('updatechat', 'Servidor', 'Has ingresado a la sala '+ newroom);
 		// sent message to OLD room
-		socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username+' has left this room');
+		socket.broadcast.to(socket.room).emit('updatechat', 'Servidor', socket.username+' ha dejado la sala');
 		// update socket session room title
 		socket.room = newroom;
-		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
+		socket.broadcast.to(newroom).emit('updatechat', 'Servidor', socket.username+' ha ingresado a la sala');
 		socket.emit('updaterooms', rooms, newroom);
 	});
 	
@@ -62,7 +62,7 @@ io.sockets.on('connection', function (socket) {
 		// update list of users in chat, client-side
 		io.sockets.emit('updateusers', usernames);
 		// echo globally that this client has left
-		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+		socket.broadcast.emit('updatechat', 'Servidor', socket.username + ' se ha desconectado');
 		socket.leave(socket.room);
 	});
 });
