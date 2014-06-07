@@ -3,11 +3,17 @@
 <script>
 	var socket = io.connect('http://192.168.1.125:8080');
 
+
 	// on connection to server, ask for user's name with an anonymous callback
 	socket.on('connect', function(){
 		// call the server-side function 'adduser' and send one parameter (value of prompt)
-		socket.emit('adduser', prompt("What's your name?"));
+
+		socket.emit('adduser', 'jorge');
+
+
 	});
+
+
 
 	// listener, whenever the server emits 'updatechat', this updates the chat body
 	socket.on('updatechat', function (username, data) {
@@ -31,6 +37,18 @@
 		socket.emit('switchRoom', room);
 	}
 	
+
+
+/*
+$(function(){
+		$('#crearsala').click( function() {
+			var sala = $('#CrearSala').val()
+			$('#CrearSala').val('');
+			socket.emit('create', sala);
+			});
+	});
+
+*/
 	// on load of page
 	$(function(){
 		// when the client clicks SEND
@@ -39,6 +57,7 @@
 			$('#data').val('');
 			// tell server to execute 'sendchat' and send along one parameter
 			socket.emit('sendchat', message);
+			//socket.emit('create', message);
 		});
 
 		// when the client hits ENTER on their keyboard
@@ -50,13 +69,28 @@
 		});
 	});
 
+//socket.emit('create', 'hola');
+
+	$(function(){
+		// when the client clicks SEND
+		$('#crearsala').click( function() {
+			var sala = $('#CrearSala').val();
+			$('#CrearSala').val('');
+			// tell server to execute 'sendchat' and send along one parameter
+			socket.emit('create', sala);
+		});
+	});
+
 </script>
 <div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
-	<b>ROOMS</b>
+	<b>Salas</b>
 	<div id="rooms"></div>
 </div>
 <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
 	<div id="conversation"></div>
 	<input id="data" style="width:200px;" />
 	<input type="button" id="datasend" value="send" />
+
+	<input id="CrearSala" style="width:200px;" />
+	<input type="button" id="crearsala" value="Crear Sala" />
 </div>
