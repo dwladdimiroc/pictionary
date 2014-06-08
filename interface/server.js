@@ -10,8 +10,16 @@ app.use("/css", express.static(__dirname + '/css'));
 app.use("/function", express.static(__dirname + '/function'));
 
 // routing
-app.get('/sala-principal.html', function (req, res) {
-  res.sendfile(__dirname + '/sala-principal.html');
+app.get('/', function (req, res) {
+  res.sendfile(__dirname + '/view/index.html');
+});
+
+app.get('/sala-principal', function (req, res) {
+  res.sendfile(__dirname + '/view/sala-principal.html');
+});
+
+app.get('/sala-pizarra', function (req, res) {
+  res.sendfile(__dirname + '/view/sala-pizarra.html');
 });
 
 var usernames = {};
