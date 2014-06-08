@@ -20,19 +20,6 @@
 		$('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
 	});
 
-	// listener, whenever the server emits 'updaterooms', this updates the room the client is in
-	socket.on('updaterooms', function(rooms, current_room) {
-		$('#rooms').empty();
-		$.each(rooms, function(key, value) {
-			if(value == current_room){
-				$('#rooms').append('<div>' + value + '</div>');
-			}
-			else {
-				$('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
-			}
-		});
-	});
-
 
 
 
@@ -45,7 +32,10 @@
 				$('#usernames').append('<div>' + value + '</div>');
 				cantidad++;
 		});
-		alert(cantidad);
+		if (cantidad==4) {
+			alert("Empezando juego, hay: "+cantidad);
+		};
+		
 	});
 
 
@@ -54,10 +44,6 @@
 
 
 
-	function switchRoom(room){
-		socket.emit('switchRoom', room);
-	}
-	
 
 
 /*
@@ -93,20 +79,10 @@ $(function(){
 
 //socket.emit('create', 'hola');
 
-	$(function(){
-		// when the client clicks SEND
-		$('#crearsala').click( function() {
-			var sala = $('#CrearSala').val();
-			$('#CrearSala').val('');
-			// tell server to execute 'sendchat' and send along one parameter
-			socket.emit('create', sala);
-		});
-	});
+
 
 </script>
 <div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
-	<b>Salas</b>
-	<div id="rooms"></div>
 	<b>Usuarios</b>
 	<div id="usernames"></div>
 </div>
@@ -114,7 +90,4 @@ $(function(){
 	<div id="conversation"></div>
 	<input id="data" style="width:200px;" />
 	<input type="button" id="datasend" value="send" />
-
-	<input id="CrearSala" style="width:200px;" />
-	<input type="button" id="crearsala" value="Crear Sala" />
 </div>
