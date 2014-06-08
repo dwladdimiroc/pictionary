@@ -15,91 +15,78 @@
 
     <!-- Custom styles for this template -->
     <link href="css/cover.css" rel="stylesheet">
+    <script src="src/getURL.js"></script>
+    <script>
+      var username = getUrlParameters("nick", "", true);
+    </script>
 
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io.connect('http://192.168.1.125:8080');
 
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]--> 
+      socket.on('connect', function(){
+        socket.emit('adduser', username);
+      });
 
+      socket.on('updatechat', function (username, data) {
+        $('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+      });
+
+      socket.on('updaterooms', function(rooms, current_room) {
+        $('#rooms').empty();
+        $.each(rooms, function(key, value) {
+          if(value == current_room){
+            $('#rooms').append('<div>' + value + '</div>');
+          }
+          else {
+            $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+          }
+        });
+      });
+
+      socket.on('updateusers', function(usernames) {
+        $('#usernames').empty();
+        var cantidad=0;
+        $.each(usernames, function(key, value) {
+            $('#usernames').append('<div>' + value + '</div>');
+            cantidad++;
+        });
+        alert(cantidad);
+      });
+
+      function switchRoom(room){
+        socket.emit('switchRoom', room);
+      }
+      
+      $(function(){
+        $('#datasend').click( function() {
+          var message = $('#data').val();
+          $('#data').val('');
+          socket.emit('sendchat', message);
+        });
+
+        $('#data').keypress(function(e) {
+          if(e.which == 13) {
+            $(this).blur();
+            $('#datasend').focus().click();
+          }
+        });
+      });
+
+      $(function(){
+        $('#crearsala').click( function() {
+          var sala = $('#CrearSala').val();
+          $('#CrearSala').val('');
+          socket.emit('create', sala);
+        });
+      });
+
+    </script>
 
   </head>
 
   <body>
 
-
-<!-- Multicast-->
-  <script type="text/javascript" src="jquery.js"></script>
-  <script src="socket.io.js"></script>
-  <script>
-    var servidorNode = 'http://127.0.0.1'; 
-    var puerto = 8008; 
-    var socket;
-    var id_user;
-    
-    var palabra='palabra';
-
-
-
-    try {
-      
-
-      socket = io.connect(servidorNode+':'+puerto+'/');
-      
-      socket.on('Multicast', function (data) {
-      if (data.texto=='palabra') {
-        alert(' El texto multicast de la sala ' + data.room +' es: ' + data.texto );
-            };
-
-        }); 
-    }
-
-    catch (err) {
-      alert('No está disponible el servidor Node.js');
-    } 
-
-    function salaPrincipal() {
-      var id = "0";
-      id_user = id;
-      socket.emit('ejemplo3', {room: id});
-    }
-    
-    function ejemplo2() {
-      var texto = document.getElementById('inputTextMulticast').value;
-      var e = document.getElementById("dropdown");//multiples opciones
-      var id = e.options[e.selectedIndex].text;//selecina multiple opcion
-      socket.emit('ejemplo2', {text: texto,room: id});
-    }
-    
-    function ejemplo3() {
-      var id=id_user;
-      socket.emit('salirRoom', {room: id});
-      var e = document.getElementById("dropdown");
-      id = e.options[e.selectedIndex].text;
-      id_user = id;
-      socket.emit('ejemplo3', {room: id});
-    } 
-    
-    function salirRoom() {
-      var e = document.getElementById("dropdown");
-      var id = e.options[e.selectedIndex].text;
-      socket.emit('salirRoom', {room: id});
-      id = "0";
-      socket.emit('ejemplo3', {room: id});
-      var valor = "There";
-      $("#dropdown option[value="+ valor +"]").attr("selected",true);
-    } 
-    
-  </script>
-<!-- FIN Multicast-->
-
- <div class="site-wrapper-right">
-            <h4>About</h4>
-            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
-</div>
 
 <div class="site-wrapper">
 
@@ -115,101 +102,59 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Project name</a>
-        </div>
-        <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Tabla Resultados</a></li>
-            <li><a href="#">Alguna wea</a></li>
-          </ul>
-       
+          <a class="navbar-brand" href="#">Pictonary</a>
         </div>
       </div>
     </div>
 
     <div class="container-fluid">
       <div class="row">
+
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Cosas</a></li>
-            <li><a href="#">Extras</a></li>
-            <li><a href="#">Para</a></li>
-            <li><a href="#">Poner</a></li>
+            <li class="active">Usuarios</li>
+            <div id="usernames"></div>
           </ul>
-<br><br>
-<!--posible chat-->
-           <div class="site-wrapper-right">
-              <h4>POSIBLE CHAT</h4>
-              <p></p>
+          <br><br>        
+        </div>
+
+        <div class="col-sm-8 col-md-14 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active">Chat de la sala principal</li>
+            <div id="conversation"></div>
+              <input id="data" style="width:200px;" />
+              <input type="button" id="datasend" value="send" />
+          </ul>
+          <br><br>          
+        </div>
+
+
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active">Salas</li>
+            <div id="rooms"></div>
+            <input id="CrearSala" style="width:200px;" />
+            <input type="button" id="crearsala" value="Crear Sala" />
+          </ul>
+          <br><br>          
+        </div>        
+
+        <div class="mastfoot">
+          <div class="inner">
+            <p> <a href="#"> </a> <a href="#"> </a>.</p>
           </div>
         </div>
-         
-<!-- FIN posible chat-->
 
-
-
-<!-- pizarra-->
-  <section>
-    <article><!-- POR ALGUNA EXTRAÑA RAZON, LA PIZARRA PIDE ESTA SECCION
-    SINO, NO FUNCIONA --></article> 
-  </section>
-  <!-- FIN pizarra-->
-
-<!-- Multicast-->
-<body onload="salaPrincipal()">
-  <div id="main">
-    <h2> EJEMPLO MULTICAST</h2>
-    <div>
-      <input id="inputTextMulticast" type="text" ></input>
-      <input id="btn1" type="button" onclick="ejemplo2()" value="Multicast" ></input>
+      </div>
     </div>
-    <div>
-       <label for="dropdown">Seleccione Una Sala</label>
-       <select id="dropdown" onChange="ejemplo3()"></select> <!--se detecta cambio, se carga la funcion ejemplo3 automatico -->
-       <input id="btn_salirRoom" type="button" onClick="salirRoom()" value="Salir Room" ></input>
-       <br><br> 
-    </div>
-  </div>
-<script>
-var ddl = document.getElementById("dropdown");
-ddl.options.add(new Option("0","There"));
-ddl.options.add(new Option("1","There1"));
-ddl.options.add(new Option("2","There2"));
-</script>
-<!-- FIN Multicast-->
 
 
 
-          <div class="mastfoot">
-            <div class="inner">
-              <p> <a href="#"> </a> <a href="#"> </a>.</p>
-            </div>
-          </div>
-
-
-
-
-  </div>
-</div>
-
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-
- <!-- Scripts Pizarra -->
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
   <script type="text/javascript" src="js/jquery.event.drag-2.0.js"></script>
-  <script src="http://localhost:4000/socket.io/socket.io.js"></script>
-  <script type="text/javascript" src="scripts.js"></script>
-  <link rel="stylesheet" href="css/stylePizarra.css" />
-<!--FIN Scripts Pizarra -->
+  <script type="text/javascript" src="src/scripts.js"></script>
+  <script src="dist/js/bootstrap.min.js"></script>
+  <script src="docs/assets/js/docs.min.js"></script>
 
-
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="dist/js/bootstrap.min.js"></script>
-    <script src="docs/assets/js/docs.min.js"></script>
   </body>
 </html>
