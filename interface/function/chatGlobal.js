@@ -1,4 +1,6 @@
-var socket = io.connect('http://192.168.1.125:8080');
+var socket = io.connect('http://192.168.1.136:8085');
+
+//var cantidadUser = 0;
 
       socket.on('connect', function(){
         socket.emit('adduser', username);
@@ -22,17 +24,29 @@ var socket = io.connect('http://192.168.1.125:8080');
 
       socket.on('updateusers', function(usernames) {
         $('#usernames').empty();
-        var cantidad=0;
         $.each(usernames, function(key, value) {
-            $('#usernames').append('<div>' + value + '</div>');
-            cantidad++;
+            $('#usernames').append('<div>' + value + '</div>');;
         });
-        //alert(cantidad);
       });
+
+      /*socket.on('cantuser', function(usernames) {
+        $.each(usernames, function(key, value) {
+            cantidadUser++;
+        });
+      });*/
 
       function switchRoom(room){
         socket.emit('switchRoom', room);
       }
+
+      $(function(){
+        $('#ctduser').click( function() {
+          socket.emit('userRoom');
+          //socket.emit('sendchat', cantidadUser);
+          //cantidadUserRoom = 0;
+        });
+        //alert(cantidadUser);
+      });
       
       $(function(){
         $('#datasend').click( function() {
