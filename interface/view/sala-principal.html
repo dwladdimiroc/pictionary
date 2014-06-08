@@ -28,8 +28,8 @@
     </script>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-      var socket = io.connect('http://192.168.1.125:8080');
+    <script src="function/chatGlobal.js">
+      /*var socket = io.connect('http://192.168.1.125:8080');
 
       socket.on('connect', function(){
         socket.emit('adduser', username);
@@ -86,7 +86,7 @@
           $('#CrearSala').val('');
           socket.emit('create', sala);
         });
-      });
+      });/*
 
     </script>
 
@@ -119,7 +119,7 @@
 
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active">Usuarios</li>
+            <li class="active"><h3>Usuarios conectados</h3></li>
             <div id="usernames"></div>
           </ul>
           <br><br>        
@@ -127,7 +127,7 @@
 
         <div class="col-sm-8 col-md-14 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active">Chat de la sala principal</li>
+            <li class="active"><h3>Chat de la sala principal</h3></li>
             <div id="conversation"></div>
               <input id="data" style="width:200px;" />
               <input type="button" id="datasend" value="Enviar" />
@@ -138,7 +138,7 @@
 
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active">Salas</li>
+            <li class="active"><h3>Salas</h3></li>
             <div id="rooms"></div>
             <input id="CrearSala" style="width:200px;" />
             <input type="button" id="crearsala" value="Crear Sala" />
