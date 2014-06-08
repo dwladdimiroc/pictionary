@@ -21,9 +21,10 @@
 
     <!-- Custom styles for this template -->
     <link href="css/cover.css" rel="stylesheet">
-    <script src="src/getURL.js"></script>
+    <script src="function/getURL.js"></script>
     <script>
       var username = getUrlParameters("nick", "", true);
+      //var username = "Hola";
     </script>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -57,7 +58,7 @@
             $('#usernames').append('<div>' + value + '</div>');
             cantidad++;
         });
-        alert(cantidad);
+        //alert(cantidad);
       });
 
       function switchRoom(room){
