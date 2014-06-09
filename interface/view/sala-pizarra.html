@@ -24,12 +24,14 @@
     <link href="css/style.css" rel="stylesheet">
 
     <script src="function/getURL.js"></script>
-    <script>var username = "Jugador"</script>
+    <script>
+      var username = getUrlParameters("nick", "", true);
+    </script>
 
     
     <!--<script src="function/whiteboard.js"></script>-->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="function/chatGlobal.js"></script>
+    <script src="function/chatPizarra.js"></script>
 
   </head>
 
@@ -50,7 +52,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/sala-principal">Pictonary</a>
+          <a class="navbar-brand" href="/">Pictonary</a>
         </div>
       </div>
     </div>
@@ -63,18 +65,22 @@
             <li class="active"><b>Jugadores</b></li>
             <div id="usernames"></div>
           </ul>
-          <br><br>        
+          <br><br>
+          <ul class="nav nav-sidebar">
+            <li class="active"><b>Dato del juego</b></li>
+            <div id="game"></div>
+          </ul>        
         </div>
 
         <div class="col-sm-8 col-md-14 sidebar">
           <h3>Pizarra</h3>
-          <object width="450" height="480" data="http://192.168.1.136/pictonary/pizarra.html"></object>
+          <object width="450" height="480" data="http://192.168.2.4/pictonary/pizarra.html"></object>
         </div>
 
 
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><b>Chat de la sala principal</b></li>
+            <li class="active"><b>Chat de la sala</b></li>
             <div id="conversation"></div>
               <input id="data" style="width:200px;" />
               <input type="button" class="btn btn-inverse btn-small" id="datasend" value="Enviar" />

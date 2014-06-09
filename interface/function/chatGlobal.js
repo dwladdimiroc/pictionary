@@ -1,4 +1,5 @@
-var socket = io.connect('http://192.168.1.136:8085');
+var socket = io.connect('http://192.168.2.4:8085');
+var valRoom = "nn";
 
 //var cantidadUser = 0;
 
@@ -10,43 +11,29 @@ var socket = io.connect('http://192.168.1.136:8085');
         $('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
       });
 
-      socket.on('updaterooms', function(rooms, current_room) {
+      socket.on('updaterooms', function(user, rooms, current_room) {
         $('#rooms').empty();
         $.each(rooms, function(key, value) {
           if(value == current_room){
             $('#rooms').append('<div>' + value + '</div>');
           }
           else {
-            $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+            $('#rooms').append('<div><a href="sala-pizarra?nick='+user+'" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
           }
         });
       });
 
-      socket.on('updateusers', function(usernames) {
+      socket.on('updateusers', function (usernames) {
         $('#usernames').empty();
         $.each(usernames, function(key, value) {
-            $('#usernames').append('<div>' + value + '</div>');;
+            $('#usernames').append('<div>' + value + '</div>');
         });
       });
-
-      /*socket.on('cantuser', function(usernames) {
-        $.each(usernames, function(key, value) {
-            cantidadUser++;
-        });
-      });*/
 
       function switchRoom(room){
         socket.emit('switchRoom', room);
+        //socket.emit('play', {});
       }
-
-      $(function(){
-        $('#ctduser').click( function() {
-          socket.emit('userRoom');
-          //socket.emit('sendchat', cantidadUser);
-          //cantidadUserRoom = 0;
-        });
-        //alert(cantidadUser);
-      });
       
       $(function(){
         $('#datasend').click( function() {
@@ -64,9 +51,17 @@ var socket = io.connect('http://192.168.1.136:8085');
       });
 
       $(function(){
-        $('#crearsala').click( function() {
-          var sala = $('#CrearSala').val();
-          $('#CrearSala').val('');
-          socket.emit('create', sala);
+        $('#createRoom').click( function() {
+          var sala = $('#nameRoom').val();
+          //$('#nameRoom').val('');
+
+          socket.emit('validateRoomServer', sala);
+          if(valRoom == "true"){
+            alert("Su sala ya se encuentra utilizado en el sistema...")
+          }
+          else{
+            alert(sala+" has sido ingresado exitosamente");
+            socket.emit('create', sala);
+          }
         });
       });

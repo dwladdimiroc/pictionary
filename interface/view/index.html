@@ -16,6 +16,9 @@
     <!-- Custom styles for this template -->
     <link href="css/cover.css" rel="stylesheet">
 
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="function/principal.js"></script>
+
   </head>
 
   <body>
@@ -30,7 +33,7 @@
             <div class="inner">
               <h3 class="masthead-brand"> </h3>
               <ul class="nav masthead-nav">
-                <li class="active"><a href="#">Pictonary</a></li>
+                <li class="active"><a href="/">Pictonary</a></li>
                 
               
               </ul>
@@ -40,10 +43,16 @@
           <div class="inner cover">
             <h1 class="cover-heading">Bienvenido</h1>
             Ingrese su nick
-            <form action="sala-principal" method="get" target="_blank">
-              <input type="text" name="nick">
-              <br><input type="submit" class="btn btn-sucess btn-large" value="Ingresar">
-            </form>
+            <script>
+           // setTimeout(function(){
+            </script>
+              <form name="user" action="sala-principal" method="get" onsubmit="return validateName()" target="_blank">
+                <input type="text" name="nick" required>
+                <br><input type="submit" class="btn btn-sucess btn-large" value="Ingresar"/>
+              </form>
+            <script>
+          //  },1000);
+            </script>
           </div>
 
       <!--<div class="mastfoot">
