@@ -64,4 +64,11 @@ var valRoom = "nn";
             socket.emit('create', sala);
           }
         });
+
+        $('#nameRoom').keypress(function(e) {
+          if(e.which == 13) {
+            $(this).blur();
+            $('#createRoom').focus().click();
+          }
+        });
       });

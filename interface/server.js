@@ -40,7 +40,7 @@ var sala = {
     puntajeTeamA: 0,
     puntajeTeamB: 0,
 
-    turnoA: 1,
+    turnoA: 0,
     turnoB: 0,
 
     palabraTurno: "",
@@ -158,7 +158,7 @@ io.sockets.on('connection', function (socket) {
 	    sala.player4 = "";
 	    sala.puntajeTeamA = 0;
 	    sala.puntajeTeamB = 0;
-	    sala.turnoA = 1;
+	    sala.turnoA = 0;
 	    sala.turnoB = 0;
 	    sala.palabraTurno = "";
 	    sala.listaJugar = 0;
@@ -207,7 +207,7 @@ io.sockets.on('connection', function (socket) {
 
 		//console.log("ID Room %d", idRoom(socket.room));
 		//console.log("Cant. Player %d", listaSala[idRoom(socket.room)].cantidadPlayer);
-		if( listaSala[idRoom(socket.room)].cantidadPlayer == 1 ){
+		if( listaSala[idRoom(socket.room)].cantidadPlayer == 2 ){
 			socket.emit('updatechat', 'Servidor', 'Listos para jugar');
 			socket.broadcast.to(socket.room).emit('updatechat', 'Servidor', 'Listos para jugar');
 
@@ -278,6 +278,11 @@ io.sockets.on('connection', function (socket) {
 		else{
 			socket.emit('updatechat', 'Servidor', 'No puede ingresar a esa sala... Ingrese a otra');
 		}
+	});
+
+	socket.on('actPartida', function(partida){
+		listaSala[idRoom(partida.identificador)] = partida;
+		io.sockets.in(socket.room).emit('statisticsPlay', listaSala[idRoom(socket.room)]);
 	});
 
 	socket.on('validateNameServer', function(nombre){
