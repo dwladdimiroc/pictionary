@@ -14,7 +14,18 @@
   <script type="text/javascript" src="js/jquery.event.drag-2.0.js"></script>
   <script src="dist/js/bootstrap.min.js"></script>
   <script src="docs/assets/js/docs.min.js"></script>
-   
+   <script language="JavaScript">
+  function doPage()
+  {
+    var objTag = document.getElementById("contentarea");
+    if (objTag != null)
+    {
+      objTag.setAttribute('data', 'http://localhost/pictonary/whiteboard/pizarra.html');
+      alert('Pizarra Limpiada');
+    }
+  }
+  </script>
+
 
     <!-- Bootstrap core css -->
     <link href="css/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -74,7 +85,8 @@
 
         <div class="col-sm-8 col-md-14 sidebar">
           <h3>Pizarra</h3>
-          <object width="450" height="480" data="http://192.168.2.4/pictonary/pizarra.html"></object>
+          <p><input type="button" value="Limpiar Pizarra" onclick="doPage();" /></p>
+<object style="visibility: visible; " standby="loading data" id="contentarea" title="loading" width="450%" height="480%" type="text/html" data="http://localhost/pictonary/whiteboard/pizarra.html"></object>
         </div>
 
 

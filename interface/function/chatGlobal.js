@@ -1,4 +1,4 @@
-var socket = io.connect('http://192.168.2.4:8085');
+var socket = io.connect('localhost:8085');
 var valRoom = "nn";
 
 //var cantidadUser = 0;

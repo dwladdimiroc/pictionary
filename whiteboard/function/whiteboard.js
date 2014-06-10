@@ -14,7 +14,7 @@
     App.ctx.strokeStyle = "#ECD018";
     App.ctx.lineWidth = 5;
     App.ctx.lineCap = "round";
-    App.socket = io.connect('http://192.168.2.4:8085');
+    App.socket = io.connect('localhost:8085');
     App.socket.on('draw', function(data) {
       return App.draw(data.x, data.y, data.type);
     });
