@@ -270,10 +270,22 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 
+	socket.on('proxTurn', function(partida){
+		word = generarRandom();
+		partida.palabraTurno = word.texto;
+		partida.puntajePalabra = word.puntaje
+		io.sockets.in(socket.room).emit('startPlay', partida);
+	});
+
 	socket.on('sendchat', function (data) {
 		//console.log("Socket Room %s", socket.room);
 		socket.emit('updaterooms', socket.user, rooms, socket.room);
 		io.sockets.in(socket.room).emit('updatechat', socket.user, data);	
+	});
+
+	socket.on('stopClock', function () {
+		//console.log("Socket Room %s", socket.room);
+		io.sockets.in(socket.room).emit('stopClockUser');	
 	});
 
 	socket.on('drawClick', function (data) {
@@ -382,9 +394,11 @@ io.sockets.on('connection', function (socket) {
 		else
 		{
 			//console.log("DeleteR");
-			io.sockets.in(socket.room).emit('updateusers', userRoom);
+			io.sockets.in(socket.room).emit('updateusers', userRoom); 
 			io.sockets.in(socket.room).emit('updatechat', 'Servidor', socket.user + ' se ha desconectado');
 			deleteUserRoom(socket.user, socket.room);
+
+			io.sockets.in(socket.room).emit('disableGame', listaSala[idRoom(socket.room)]);
 		}
 		socket.leave(socket.room);
 	});

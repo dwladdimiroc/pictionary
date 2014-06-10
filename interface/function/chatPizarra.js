@@ -1,4 +1,4 @@
-var socket = io.connect('localhost:8085');
+var socket = io.connect('http://192.168.2.4:8085');
 
 
 
@@ -56,7 +56,17 @@ var dibuja = 0;
             $('#game').append('<div>' + key + ': ' + value + '</div>');
         });
       });
-      
+
+      socket.on('stopClockUser', function () {
+        console.log("Tiempo detenido");
+        detenerTiempo();        
+      });
+
+      socket.on('disableGame', function(partida){
+        juego = partida;
+        detenerTiempo();
+      });
+
       $(function(){
         $('#datasend').click( function() {
           console.log("Click");
@@ -69,7 +79,8 @@ var dibuja = 0;
           else if (escribe==1)
           {
             if(juego.palabraTurno == message){
-              detenerTiempo();
+              socket.emit('sendchat', message);
+              socket.emit('stopClock');
               if(juego.turnoA == juego.turnoB){
                 juego.puntajeTeamA += juego.puntajePalabra;
               }
@@ -78,8 +89,8 @@ var dibuja = 0;
                 juego.puntajeTeamB += juego.puntajePalabra;
               }
               alert("¡Has acertado con el dibujo!");  
-              socket.emit('sendchat', message);
-              gestionarTurno();             
+
+              modificarEstadisticas();            
             }
             socket.emit('sendchat',message);
           }
@@ -95,7 +106,7 @@ var dibuja = 0;
 
       function iniciarPartida(){
         //console.log("Iniciar partida");
-        socket.emit('actPartida',juego);
+        //socket.emit('actPartida',juego);
         var player = identificarPlayer(username);
         gestionarTurno(player);
       }
@@ -172,28 +183,42 @@ var dibuja = 0;
         alert("Comienzan los 30 segundos... Go!");
         time = setTimeout(function(){
           alert("Perdió su turno... :( La palabra era "+juego.palabraTurno);
-          if ( juego.turnoA == juego.turnoB ){
+          modificarEstadisticas();  
+        }, 32000);
+      }
+
+      function modificarEstadisticas(){
+
+        if ( juego.turnoA == juego.turnoB ){
             juego.turnoA++;
+        }
+        else
+        {
+          juego.turnoB++;
+        }
+
+        if(juego.turnoA == 3 && juego.turnoB == 3){
+          mostrarResultados();
+          socket.emit('actPartida', juego);
+
+          if(escribe==1){
+            socket.emit('nuevaPartida', juego);
           }
-          else
-          {
-            juego.turnoB++;
-          }
-          if(juego.turnoA == 3 && juego.turnoB == 3){
-            mostrarResultados();
-            socket.emit('actPartida',juego);
-            socket.emit('nuevaPartida',juego);
-          }
-          gestionarTurno();
-        }, 1000000);
+        }
+
+        if(escribe==1){
+          escribe=0;
+          socket.emit('proxTurn', juego);
+        }
+        dibuja=0;
       }
 
       function mostrarResultados(){
         if(juego.puntajeTeamA < juego.puntajeTeamB){
-          alert("Esto ha sido victor del equipo B, un puntaje de "+juego.puntajeTeamB+" contra "+juego.puntajeTeamA+" del equipo A");
+          alert("Esto ha sido victoria del equipo B, un puntaje de "+juego.puntajeTeamB+" contra "+juego.puntajeTeamA+" del equipo A");
         }
         else if(juego.puntajeTeamA < juego.puntajeB){
-          alert("Esto ha sido victor del equipo A, un puntaje de "+juego.puntajeTeamA+" contra "+juego.puntajeTeamB+" del equipo B");
+          alert("Esto ha sido victoria del equipo A, un puntaje de "+juego.puntajeTeamA+" contra "+juego.puntajeTeamB+" del equipo B");
         }
         else{
           alert("¡Señooreeees esto ha sido empate!");

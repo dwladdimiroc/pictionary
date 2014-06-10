@@ -87,7 +87,7 @@
         <div class="col-sm-8 col-md-14 sidebar">
           <h3>Pizarra</h3>
 		<object style="visibility: visible; " standby="loading data" id="contentarea" title="loading" width="450" height="480" type="text/html" data="http://192.168.2.4/pictonary/pizarra.html" disabled></object>
-		<p><input type="button" class="btn btn-inverse btn-small" value="Limpiar Pizarra" onclick="doPage();"/></p>
+		<p><input type="button" class="btn btn-inverse btn-small" value="Limpiar Pizarra" onclick="doPage();" disable/></p>
         </div>
 
 
