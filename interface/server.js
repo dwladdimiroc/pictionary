@@ -4,6 +4,13 @@ var express = require('express')
   , server = http.createServer(app)
   , io = require('socket.io').listen(server);
 
+var animales = ['perro', 'gato','conejo','camello','cerdo','culebra','hombre','cocodrilo','gaviota','paloma'];
+var objeto = ['mesa', 'silla', 'auto', 'rueda', 'computador','bicicleta', 'moto','celular','lapiz','estufa'];
+var accion = ['bañarse', 'saltar','cantar','caminar','gritar','estornudar','nadar','escuchar','correr','comer'];
+var profesion = ['ingeniero','mecanico','doctor','profesor','dentista', 'dibujante','escritor','comediante','vagabundo','ladron'];
+var random = ['ramon', 'pedro','juan', 'dios', 'jesus','maria','iphone','android','bebida', 'dormir','despertar', 'todo','superman'];
+var consultas = [1,2,3,4,5];
+
 server.listen(8085);
 
 app.use("/css", express.static(__dirname + '/css'));
@@ -44,8 +51,14 @@ var sala = {
     turnoB: 0,
 
     palabraTurno: "",
+    puntajePalabra: 0,
 
     listaJugar: 0
+};
+
+var word = {
+  texto: "",
+  puntaje: ""
 };
 
 function searchName (name) {
@@ -145,6 +158,41 @@ function idRoom(room){
 	return -1;
 }
 
+function generarRandom(){
+    var palabra = {
+    	texto: "",
+    	puntaje: ""
+	};
+	var numero = consultas[Math.floor(Math.random() * consultas.length)];
+	if (consultas==1) {
+		palabra.texto = animales[Math.floor(Math.random() * animales.length)];
+		palabra.puntaje = 1;
+	}
+	else if (consultas==2)
+	{
+		palabra.texto = objeto[Math.floor(Math.random() * objeto.length)];
+		palabra.puntaje = 2;
+	}
+	else if (consultas==3)
+	{
+		palabra.texto = accion[Math.floor(Math.random() * accion.length)];
+		palabra.puntaje = 3;
+	}
+	else if (consultas==4)
+	{
+		palabra.texto = profesion[Math.floor(Math.random() * profesion.length)];
+		palabra.puntaje = 4;
+	}
+	else 
+	{
+		palabra.texto = random[Math.floor(Math.random() * random.length)];
+		palabra.puntaje = 5;
+	}
+	
+	//console.log("RandomReturn");
+	return palabra;
+}
+
 io.sockets.on('connection', function (socket) {
 	
 	//Crea una sala
@@ -161,6 +209,7 @@ io.sockets.on('connection', function (socket) {
 	    sala.turnoA = 0;
 	    sala.turnoB = 0;
 	    sala.palabraTurno = "";
+	    sala.puntajePalabra = 0;
 	    sala.listaJugar = 0;
 		listaSala.push(sala);
 
@@ -168,7 +217,7 @@ io.sockets.on('connection', function (socket) {
     	socket.broadcast.to('Principal').emit('updatechat', 'Servidor', 'Se ha creado la sala: '+ roomname);
 
 		//userRoom = searchUserRoom(socket.room);
-		io.sockets.in(socket.room).emit('updaterooms', socket.user, rooms, socket.room);
+		socket.emit('updaterooms', socket.user, rooms, socket.room);
 	});
 
 	//A~nadir usuario
@@ -194,12 +243,10 @@ io.sockets.on('connection', function (socket) {
 		socket.emit('updatechat', 'Servidor', 'Bienvenido a la sala '+socket.room);
 		socket.broadcast.to(socket.room).emit('updatechat', 'Servidor', socket.user + ' se ha conectado');
 		
-		updateListUserRoom(socket.room);
-		//console.log("User: %s",userRoom[0]);
+		updateListUserRoom(socket.room);		
 		socket.emit('updateusers', userRoom);
 		socket.broadcast.to(socket.room).emit('updateusers', userRoom);
 		userRoom = [];
-
 
 		//console.log("CtdUser: %d",listaSala[idRoom(socket.room)].cantidadPlayer);
 		socket.emit('statisticsPlay', listaSala[idRoom(socket.room)]);
@@ -207,9 +254,16 @@ io.sockets.on('connection', function (socket) {
 
 		//console.log("ID Room %d", idRoom(socket.room));
 		//console.log("Cant. Player %d", listaSala[idRoom(socket.room)].cantidadPlayer);
-		if( listaSala[idRoom(socket.room)].cantidadPlayer == 2 ){
+		if( listaSala[idRoom(socket.room)].cantidadPlayer == 4 ){
 			socket.emit('updatechat', 'Servidor', 'Listos para jugar');
 			socket.broadcast.to(socket.room).emit('updatechat', 'Servidor', 'Listos para jugar');
+
+			//Inicializar sala
+			listaSala[idRoom(socket.room)].listaJugar = 1;
+			//Random palabra
+			word = generarRandom();
+			listaSala[idRoom(socket.room)].palabraTurno = word.texto;
+			listaSala[idRoom(socket.room)].puntajePalabra = word.puntaje;
 
 			socket.emit('startPlay', listaSala[idRoom(socket.room)]);
 			socket.broadcast.to(socket.room).emit('startPlay', listaSala[idRoom(socket.room)]);
@@ -218,6 +272,7 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('sendchat', function (data) {
 		//console.log("Socket Room %s", socket.room);
+		socket.emit('updaterooms', socket.user, rooms, socket.room);
 		io.sockets.in(socket.room).emit('updatechat', socket.user, data);	
 	});
 
@@ -280,10 +335,20 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 
-	socket.on('actPartida', function(partida){
+	socket.on('actPartida', function (partida){
 		listaSala[idRoom(partida.identificador)] = partida;
 		io.sockets.in(socket.room).emit('statisticsPlay', listaSala[idRoom(socket.room)]);
 	});
+
+	socket.on('nuevaPartida', function (partida){
+		listaSala[idRoom(partida.identificador)].puntajeTeamA = 0;
+		listaSala[idRoom(partida.identificador)].puntajeTeamB = 0;
+		listaSala[idRoom(partida.identificador)].turnoA = 0;
+		listaSala[idRoom(partida.identificador)].turnoB = 0;
+		listaSala[idRoom(partida.identificador)].palabraTurno = "";
+		io.sockets.in(socket.room).emit('startPlay', listaSala[idRoom(partida.identificador)]);
+	});
+
 
 	socket.on('validateNameServer', function(nombre){
 		var validate;
@@ -309,16 +374,18 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('disconnect', function(){
 		if(socket.play==0){
-			//console.log("DeleteP");
+			socket.broadcast.to('Principal').emit('updateusers', userConect);
+			socket.broadcast.to('Principal').emit('updatechat', 'Servidor', socket.user + ' se ha desconectado');
+			//console.log("Delete Principal");
 			deleteUserRoomPrincipal(socket.user);	
 		}
 		else
 		{
 			//console.log("DeleteR");
+			io.sockets.in(socket.room).emit('updateusers', userRoom);
+			io.sockets.in(socket.room).emit('updatechat', 'Servidor', socket.user + ' se ha desconectado');
 			deleteUserRoom(socket.user, socket.room);
 		}
-		io.sockets.in(socket.room).emit('updateusers', userConect);
-		io.sockets.in(socket.room).emit('updatechat', 'Servidor', socket.user + ' se ha desconectado');
 		socket.leave(socket.room);
 	});
 	

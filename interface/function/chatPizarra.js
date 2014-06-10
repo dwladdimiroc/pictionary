@@ -1,5 +1,7 @@
 var socket = io.connect('http://192.168.2.4:8085');
 
+
+
 var juego = {
     identificador: "",
     cantidadPlayer: 0,
@@ -16,12 +18,14 @@ var juego = {
     turnoB: 0,
 
     palabraTurno: "",
+    puntajePalabra: 0,
 
     listaJugar: 0
 };
 
-var escribe=0;
-var dibuja=0;
+var time;
+var escribe = 0;
+var dibuja = 0;
 
       socket.on('connect', function(){
         //console.log("Reconnect");
@@ -30,6 +34,7 @@ var dibuja=0;
       });
 
       socket.on('startPlay', function (partida) {
+      	//console.log("Start game");
         juego = partida;
         iniciarPartida();
       });
@@ -54,18 +59,28 @@ var dibuja=0;
       
       $(function(){
         $('#datasend').click( function() {
-          //console.log("Click");
+          console.log("Click");
+          console.log("Escribe "+escribe);
           var message = $('#data').val();
-          //console.log("Mensaje: %s",message);
           $('#data').val('');
           if(juego.listaJugar == 0){
             socket.emit('sendchat', message);
           }
           else if (escribe==1)
           {
-            palabraTurno = message;
-            var respuesta = "¡Has acertado con el dibujo!";
-            socket.emit('sendchat', respuesta);
+            if(juego.palabraTurno == message){
+              detenerTiempo();
+              if(juego.turnoA == juego.turnoB){
+                juego.puntajeTeamA += juego.puntajePalabra;
+              }
+              else
+              {
+                juego.puntajeTeamB += juego.puntajePalabra;
+              }
+              alert("¡Has acertado con el dibujo!");  
+              socket.emit('sendchat', message);
+              gestionarTurno();             
+            }
             socket.emit('sendchat',message);
           }
         });
@@ -79,66 +94,117 @@ var dibuja=0;
       }); 
 
       function iniciarPartida(){
-        console.log("Datos: "+username);
-        juego.listaJugar = 1;
+        //console.log("Iniciar partida");
         socket.emit('actPartida',juego);
-        turno();
+        var player = identificarPlayer(username);
+        gestionarTurno(player);
       }
 
-      function turno(){
-        var player = identificarPlayer(username);
+      function gestionarTurno(player){
+      	//console.log("Gestionar turno");
+        
+        console.log("Palabra Turno: "+juego.palabraTurno);
         //Determinar banderas
-        if ( juego.puntajeTeamA == juego.puntajeTeamB ){
-          if (juego.puntajeTeamA % 2 == 0){
+        //console.log("TurnoA "+juego.turnoA);
+        //console.log("TurnoB "+juego.turnoB);
+        console.log("Player "+player);
+        if ( juego.turnoA == juego.turnoB ){
+          if (juego.turnoA % 2 == 0){
             if(player==1){
-              alert("Debes dibujar la siguiente palabra: ")
+              alert("Debes dibujar la siguiente palabra: "+juego.palabraTurno);
               dibuja=1;
+              socket.emit('actPartida',juego);
             }
             else if (player==2){
-              alert("Deberás adivinar el dibujo que realizará tu compañero de equipo")
+              alert("Deberás adivinar el dibujo que realizará tu compañero de equipo");
               escribe=1;
             }
           } else {
             if(player==1){
-              alert("Deberás adivinar el dibujo que realizará tu compañero de equipo")
+              alert("Deberás adivinar el dibujo que realizará tu compañero de equipo");
               escribe=1;
             }
             else if (player==2)
             {
-              alert("Debes dibujar la siguiente palabra: ")
+              alert("Debes dibujar la siguiente palabra: "+juego.palabraTurno);
               dibuja=1;
+              socket.emit('actPartida',juego);
+            }
+            else{
+              socket.emit('actPartida',juego);
             }
           }
         }
         else
         {
-          if (juego.puntajeTeamB % 2 == 0){
+          if (juego.turnoB % 2 == 0){
             if(player==3){
-              alert("Deberás adivinar el dibujo que realizará tu compañero de equipo")
+              alert("Debes dibujar la siguiente palabra: "+juego.palabraTurno);
               dibuja=1;
+              socket.emit('actPartida',juego);
             }
             else if (player==4){
-              alert("Debes dibujar la siguiente palabra: ")
+              alert("Deberás adivinar el dibujo que realizará tu compañero de equipo");
               escribe=1;
             }
           } else {
             if(player==3){
-              alert("Debes dibujar la siguiente palabra: ")
+              alert("Deberás adivinar el dibujo que realizará tu compañero de equipo");
               escribe=1;
             }
             else if (player==4)
             {
-              alert("Deberás adivinar el dibujo que realizará tu compañero de equipo")
+              alert("Debes dibujar la siguiente palabra: "+juego.palabraTurno);
               dibuja=1;
+              socket.emit('actPartida',juego);
+            }
+            else{
+              socket.emit('actPartida',juego);
             }
           }
         }
+
+        iniciarTiempo();;
+
+      }
+
+      function iniciarTiempo (){
+        alert("Comienzan los 30 segundos... Go!");
+        time = setTimeout(function(){
+          alert("Perdió su turno... :( La palabra era "+juego.palabraTurno);
+          if ( juego.turnoA == juego.turnoB ){
+            juego.turnoA++;
+          }
+          else
+          {
+            juego.turnoB++;
+          }
+          if(juego.turnoA == 3 && juego.turnoB == 3){
+            mostrarResultados();
+            socket.emit('actPartida',juego);
+            socket.emit('nuevaPartida',juego);
+          }
+          gestionarTurno();
+        }, 1000000);
+      }
+
+      function mostrarResultados(){
+        if(juego.puntajeTeamA < juego.puntajeTeamB){
+          alert("Esto ha sido victor del equipo B, un puntaje de "+juego.puntajeTeamB+" contra "+juego.puntajeTeamA+" del equipo A");
+        }
+        else if(juego.puntajeTeamA < juego.puntajeB){
+          alert("Esto ha sido victor del equipo A, un puntaje de "+juego.puntajeTeamA+" contra "+juego.puntajeTeamB+" del equipo B");
+        }
+        else{
+          alert("¡Señooreeees esto ha sido empate!");
+        }
+      }
+
+      function detenerTiempo(){
+        clearTimeout(time);
       }
 
       function identificarPlayer (username){
-        //console.log(username);
-        //console.log(juego.player1);
-        //console.log(juego.player2);
         if(juego.player1 == username){
           return 1;
         }
@@ -154,30 +220,3 @@ var dibuja=0;
         return 0;
       }
 
-      function generaRandom(){
-    
-        var palabra;
-        var numero = consultas[Math.floor(Math.random() * consultas.length)];
-        if (consultas==1) {
-          palabra = animales[Math.floor(Math.random() * animales.length)];
-        }
-        else if (consultas==2)
-        {
-          palabra = objeto[Math.floor(Math.random() * objeto.length)];
-        }
-
-        else if (consultas==3)
-        {
-          palabra = accion[Math.floor(Math.random() * accion.length)];
-        }
-        else if (consultas==4)
-        {
-          palabra = profesion[Math.floor(Math.random() * profesion.length)];
-        }
-        else 
-        {
-          palabra = random[Math.floor(Math.random() * random.length)];
-        }
-
-        return palabra;
-      }
